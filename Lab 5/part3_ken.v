@@ -21,6 +21,9 @@ module divider(ClockIn, pulse);
     input ClockIn;
     reg counter;
     output pulse;
+    initial begin
+        counter = 10'b0000000000;
+    end
 
     assign pulse = (counter == 10'b0000000000) ? 1:0;
     always @(posedge ClockIn)
@@ -75,7 +78,5 @@ module part3 (ClockIn, Resetn, Start, Letter, DotDashOut);
             DotDashOut <= cur_output_encoded[11];
             cur_output_encoded <= cur_output_shifted; 
     end
-
-
     
 endmodule
