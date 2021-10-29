@@ -3,7 +3,7 @@ module flipflop(Clock, D, Reset_b, Q);
     output reg Q;
     always @(posedge Clock)
     begin 
-        if (Reset_b == 1'b1 )   
+        if (Reset_b == 1'b1)   
             Q <= 0; 
         else 
             Q <= D; 
