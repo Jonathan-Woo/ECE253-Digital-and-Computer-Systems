@@ -25,7 +25,6 @@ module part3(Clock, Resetn, Go, Divisor, Dividend, Quotient, Remainder);
     output [3:0]Quotient;
     output [3:0]Remainder;
 
-    wire count = 3'd0;
     wire negTrue;
 
     wire ld, shift, sub, restore, no_restore;
@@ -35,7 +34,6 @@ module part3(Clock, Resetn, Go, Divisor, Dividend, Quotient, Remainder);
         .resetn(Resetn), 
         .go(Go), 
         .negTrue(negTrue), 
-        .count(count), 
 
         .ld(ld), 
         .shift(shift), 
@@ -68,7 +66,6 @@ module control(
     input resetn, 
     input go, 
     input negTrue,
-    input count,
 
     output reg ld, shift, sub, restore, no_restore
     );
@@ -87,10 +84,22 @@ module control(
     begin case (curstate)
             S_LOAD: nextstate = go?S_LOAD:S_LOAD_WAIT;
             S_LOAD_WAIT: nextstate = go?S_LOAD_WAIT:S_SHIFT;
-            S_SHIFT: nextstate = S_SUB;
-            S_SUB: nextstate = negTrue?S_NEGSUB:S_POSSUB;
-            S_NEGSUB: nextstate = (count == 3'd4)?S_FINISH:S_SHIFT;
-            S_POSSUB: nextstate = (count == 3'd4)?S_FINISH:S_SHIFT;
+            S_SHIFT1: nextstate = S_SUB1;
+            S_SUB1: nextstate = negTrue?S_NEGSUB1:S_POSSUB1;
+            S_NEGSUB1: nextstate = S_SHIFT2;
+            S_POSSUB1: nextstate = S_SHIFT2;
+            S_SHIFT2: nextstate = S_SUB2;
+            S_SUB2: nextstate = negTrue?S_NEGSUB2:S_POSSUB2;
+            S_NEGSUB2: nextstate = S_SHIFT3;
+            S_POSSUB2: nextstate = S_SHIFT3;
+            S_SHIFT3: nextstate = S_SUB3;
+            S_SUB3: nextstate = negTrue?S_NEGSUB3:S_POSSUB3;
+            S_NEGSUB3: nextstate = S_SHIFT4;
+            S_POSSUB3: nextstate = S_SHIFT4;
+            S_SHIFT4: nextstate = S_SUB4;
+            S_SUB4: nextstate = negTrue?S_NEGSUB4:S_POSSUB4;
+            S_NEGSUB4: nextstate = S_FINISH;
+            S_POSSUB4: nextstate = S_FINISH;
             S_FINISH: nextstate = go?S_LOAD:S_FINISH;
         default: nextstate = S_LOAD;
         endcase
@@ -107,16 +116,52 @@ module control(
             S_LOAD:begin
                 ld = 1'b1;
             end
-            S_SHIFT:begin
+            S_SHIFT1:begin
                 shift = 1'b1; 
             end
-            S_SUB:begin
+            S_SUB1:begin
                 sub = 1'b1;
             end
-            S_NEGSUB:begin
+            S_NEGSUB1:begin
                 restore = 1'b1;
             end
-            S_POSSUB:begin
+            S_POSSUB1:begin
+                no_restore = 1'b1;
+            end
+            S_SHIFT2:begin
+                shift = 1'b1; 
+            end
+            S_SUB2:begin
+                sub = 1'b1;
+            end
+            S_NEGSUB2:begin
+                restore = 1'b1;
+            end
+            S_POSSUB2:begin
+                no_restore = 1'b1;
+            end
+            S_SHIFT3:begin
+                shift = 1'b1; 
+            end
+            S_SUB3:begin
+                sub = 1'b1;
+            end
+            S_NEGSUB3:begin
+                restore = 1'b1;
+            end
+            S_POSSUB3:begin
+                no_restore = 1'b1;
+            end
+            S_SHIFT4:begin
+                shift = 1'b1; 
+            end
+            S_SUB4:begin
+                sub = 1'b1;
+            end
+            S_NEGSUB4:begin
+                restore = 1'b1;
+            end
+            S_POSSUB4:begin
                 no_restore = 1'b1;
             end
         endcase
@@ -141,7 +186,6 @@ module data(input clk,
             output reg [3:0]reg_q,
             output reg [3:0]reg_a,
             output reg negTrue,
-            output reg counter
             );
     //2 registers
     //reg_q is loaded by dividend and shifted left
@@ -168,11 +212,9 @@ module data(input clk,
         else if(restore)begin
             reg_a <= reg_a + divisor;
             reg_q[0] <= 1'b0;
-            counter <= counter + 1;
         end
         else if(no_restore)begin
             reg_q[0] <= 1'b1;
-            counter <= counter + 1;
         end
     end
 endmodule
